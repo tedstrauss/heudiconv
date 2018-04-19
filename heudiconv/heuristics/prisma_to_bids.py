@@ -61,7 +61,8 @@ def infotodict(seqinfo):
 	lgr.info("series_description  %s", s.series_description)
 	lgr.info("image_type %s", s.image_type)
 
-        if (s.dim3 == 176) and (s.dim4 == 1) and ('t1' in s.protocol_name):
+        if (s.dim3 == 224) and (s.dim4 == 1) and ('t1' in s.protocol_name):
+          lgr.info("THIS WILL BE THE T1: %s", s.series_id)
           info[t1w] = [s.series_id] # assign if a single series meets criteria
         if (11 <= s.dim3 <= 22) and (s.dim4 == 1) and ('dti' in s.protocol_name):
           info[dwi].append(s.series_id) # append if multiple series meet criteria

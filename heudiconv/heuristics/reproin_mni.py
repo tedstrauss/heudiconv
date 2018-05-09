@@ -265,6 +265,7 @@ def filter_files(fn):
     """Return True if a file should be kept, else False.
     We're using it to filter out files that do not start with a number."""
 
+    lgr.info("reproim filter_files: line 268")
     # do not check for these accession numbers because they haven't been
     # recopied with the initial number
     donotfilter = ['A000012', 'A000013', 'A000020', 'A000041']
@@ -279,26 +280,34 @@ def filter_files(fn):
         # crazy one that got copied for some runs but not for others,
         # so we are going to discard those that got copied and let heudiconv
         # figure out the rest
+        lgr.info("filter: AA")
         return False if re.match('^[0-9]+-', sequence_dir) else True
     elif accession_number == 'unknown':
         # this one had some stuff without study description, filter stuff before
         # collecting info, so it doesn't crash completely
+        lgr.info("filter: BB")
         return False if re.match('^[34][07-9]-sn', sequence_dir) else True
     elif accession_number in donotfilter:
+        lgr.info("filter: CC")
         return True
     elif accession_number.startswith('phantom-'):
         # Accessions on phantoms, e.g. in dartmouth-phantoms/bids_test4-20161014
+        lgr.info("filter: DD")
         return True
     elif accession_number.startswith('heudiconvdcm'):
         # we were given some tarball with dicoms which was extracted so we
         # better obey
+        lgr.info("filter: EE")
         return True
     else:
+        lgr.info("filter: FF")
         return True if re.match('^[0-9]+-', sequence_dir) else False
 
 
 def create_key(subdir, file_suffix, outtype=('nii.gz', 'dicom'),
                annotation_classes=None, prefix=''):
+
+    lgr.info("reproim create_key: line 304")
     if not subdir:
         raise ValueError('subdir must be a valid format string')
     # may be even add "performing physician" if defined??
@@ -313,6 +322,7 @@ def create_key(subdir, file_suffix, outtype=('nii.gz', 'dicom'),
 
 def md5sum(string):
     """Computes md5sum of as string"""
+    lgr.info("reproim md5sum: line 319")
     if not string:
         return ""  # not None so None was not compared to strings
     m = hashlib.md5(string.encode())
@@ -331,6 +341,7 @@ def get_study_hash(seqinfo):
 def fix_canceled_runs(seqinfo, accession2run=fix_accession2run):
     """Function that adds cancelme_ to known bad runs which were forgotten
     """
+    lgr.info("reproim fix_canceled_run: line 338")
     accession_number = get_unique(seqinfo, 'accession_number')
     if accession_number in accession2run:
         lgr.info("Considering some runs possibly marked to be "
@@ -350,6 +361,7 @@ def fix_canceled_runs(seqinfo, accession2run=fix_accession2run):
 def fix_dbic_protocol(seqinfo, keys=keys2replace, subsdict=protocols2fix):
     """Ad-hoc fixup for existing protocols
     """
+    lgr.info("reproim fix_dbic_protocol: line 358")
     study_hash = get_study_hash(seqinfo)
 
     if study_hash not in subsdict:
@@ -374,6 +386,7 @@ def fix_dbic_protocol(seqinfo, keys=keys2replace, subsdict=protocols2fix):
 def fix_seqinfo(seqinfo):
     """Just a helper on top of both fixers
     """
+    lgr.info("reproim fix_seqinfo: line 383")
     # add cancelme to known bad runs
     seqinfo = fix_canceled_runs(seqinfo)
     study_hash = get_study_hash(seqinfo)
@@ -404,7 +417,7 @@ def infotodict(seqinfo):
     subindex: sub index within group
     session: scan index for longitudinal acq
     """
-
+    lgr.info("reproim infotodict: line 414")
     seqinfo = fix_seqinfo(seqinfo)
     lgr.info("Processing %d seqinfo entries", len(seqinfo))
     and_dicom = ('dicom', 'nii.gz')
@@ -607,6 +620,7 @@ def get_dups_marked(info):
     # analyze for "cancelled" runs, if run number was explicitly specified and
     # thus we ended up with multiple entries which would mean that older ones
     #  were "cancelled"
+    lgr.info("reproim get_dups_marked: line 617")
     info = info.copy()
     dup_id = 0
     for template, series_ids in list(info.items()):
@@ -634,6 +648,7 @@ def get_unique(seqinfos, attr):
     If not -- fail!
 
     """
+    lgr.info("reproim get_unique: line 645")
     values = set(getattr(si, attr) for si in seqinfos)
     assert (len(values) == 1)
     return values.pop()
@@ -644,6 +659,7 @@ def get_unique(seqinfos, attr):
 # one and so then later value parsed (again) in infotodict  would be used???
 def infotoids(seqinfos, outdir):
     # decide on subjid and session based on patient_id
+    lgr.info("reproim infotoids: line 656")
     lgr.info("Processing sequence infos to deduce study/session")
     study_description = get_study_description(seqinfos)
     study_description_hash = md5sum(study_description)
@@ -748,6 +764,7 @@ def sanitize_str(value):
 def parse_dbic_protocol_name(protocol_name):
     """Parse protocol name according to our convention with minimal set of fixups
     """
+    lgr.info("reproim parse_dbic_protocol_name: line 761")
     # Since Yarik didn't know better place to put it in, but could migrate outside
     # at some point
     protocol_name = protocol_name.replace("anat_T1w", "anat-T1w")
@@ -827,6 +844,7 @@ def parse_dbic_protocol_name(protocol_name):
 
 def fixup_subjectid(subjectid):
     """Just in case someone managed to miss a zero or added an extra one"""
+    lgr.info("reproim fix_subjectid: line 841")
     # make it lowercase
     subjectid = subjectid.lower()
     reg = re.match("sid0*(\d+)$", subjectid)
@@ -850,6 +868,7 @@ def test_md5sum():
 
 def test_fix_canceled_runs():
     from collections import namedtuple
+    lgr.info("reproim test_fix_canceled_runs: line 865")
     FakeSeqInfo = namedtuple('FakeSeqInfo',
                              ['accession_number', 'series_id',
                               'protocol_name', 'series_description'])

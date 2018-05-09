@@ -40,7 +40,7 @@ def infotodict(seqinfo):
     rest = create_key('sub-{subject}/func/sub-{subject}_task-rest_rec-{rec}_run-{item:01d}_bold', 'nii.gz')
     info = {t1w: [], dwi: [], rest: []}
     for s in seqinfo:
-	lgr.info("total_files_till_now %s", s.total_files_till_now)
+	"""lgr.info("total_files_till_now %s", s.total_files_till_now)
 	lgr.info("example_dcm_file  %s", s.example_dcm_file)
 	lgr.info("series_id  %s", s.series_id)
 	lgr.info("dcm_dir_name  %s", s.dcm_dir_name)
@@ -60,10 +60,15 @@ def infotodict(seqinfo):
 	lgr.info("referring_physician_name  %s", s.referring_physician_name)
 	lgr.info("series_description  %s", s.series_description)
 	lgr.info("image_type %s", s.image_type)
-
+        """
+        lgr.info("sequece: %s", vars(s))
         if (s.dim3 == 224) and (s.dim4 == 1) and ('t1' in s.protocol_name):
           lgr.info("THIS WILL BE THE T1: %s", s.series_id)
           info[t1w] = [s.series_id] # assign if a single series meets criteria
+        if (s.dim3 == 3) and (s.dim2 == 512) and ('t1' in s.protocol_name):
+          lgr.info("THIS WILL BE THE T1: %s", s.series_id)
+          info[t1w] = [s.series_id] # assign if a single series meets criteria
+
         if (11 <= s.dim3 <= 22) and (s.dim4 == 1) and ('dti' in s.protocol_name):
           info[dwi].append(s.series_id) # append if multiple series meet criteria
         if (s.dim4 > 10) and ('taskrest' in s.protocol_name):

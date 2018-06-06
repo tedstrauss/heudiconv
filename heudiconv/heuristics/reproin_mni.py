@@ -417,20 +417,24 @@ def infotodict(seqinfo):
     subindex: sub index within group
     session: scan index for longitudinal acq
     """
-    lgr.info("reproim infotodict: line 414")
+    #lgr.info("reproim infotodict output is %s", outtype)
+    lgr.info("reproim infotodict: line 420")
     seqinfo = fix_seqinfo(seqinfo)
     lgr.info("Processing %d seqinfo entries", len(seqinfo))
     and_dicom = ('dicom', 'nii.gz')
+    lgr.info("reproim infotodict: line 424")
 
     info = OrderedDict()
     skipped, skipped_unknown = [], []
     current_run = 0
     run_label = None   # run-
     image_data_type = None
+    lgr.info("reproim infotodict: line 431")
     for s in seqinfo:
         # XXX: skip derived sequences, we don't store them to avoid polluting
         # the directory, unless it is the motion corrected ones
         # (will get _rec-moco suffix)
+        lgr.info("reproim infotodict: line 436")
         if s.is_derived and not s.is_motion_corrected:
             skipped.append(s.series_id)
             lgr.debug("Ignoring derived data %s", s.series_id)
@@ -469,10 +473,11 @@ def infotodict(seqinfo):
         if image_data_type.startswith('MIP'):
             regd['acq'] = regd.get('acq', '') + sanitize_str(image_data_type)
 
+        lgr.info("reproim infotodict 476: if not regd %s", regd)
         if not regd:
             skipped_unknown.append(s.series_id)
             continue
-
+        lgr.info("reproim infotodict: line 478")
         seqtype = regd.pop('seqtype')
         seqtype_label = regd.pop('seqtype_label', None)
 
@@ -513,6 +518,7 @@ def infotodict(seqinfo):
         if seqtype == 'dwi' and not seqtype_label:
             seqtype_label = 'dwi'
 
+        lgr.info("reproim infotodict: line 519")
         run = regd.get('run')
         if run is not None:
             # so we have an indicator for a run
@@ -560,6 +566,7 @@ def infotodict(seqinfo):
         # if s.is_motion_corrected:
         #     assert s.is_derived, "Motion corrected images must be 'derived'"
 
+        lgr.info("reproim infotodict: line 567")
         if s.is_motion_corrected and 'rec-' in regd.get('bids', ''):
             raise NotImplementedError("want to add _acq-moco but there is _acq- already")
 
@@ -592,11 +599,13 @@ def infotodict(seqinfo):
 
         # For scouts -- we want only dicoms
         # https://github.com/nipy/heudiconv/issues/145
+        lgr.info("*** reproim infodict: line 595 ***")
         if "_Scout" in s.series_description or \
                 (seqtype == 'anat' and seqtype_label and seqtype_label.startswith('scout')):
             outtype = ('dicom',)
         else:
             outtype = ('nii.gz', 'dicom')
+        lgr.info("*** reproim infodict: line 601 ***")
 
         template = create_key(seqtype, suffix, prefix=prefix, outtype=outtype)
         # we wanted ordered dict for consistent demarcation of dups
@@ -764,7 +773,7 @@ def sanitize_str(value):
 def parse_dbic_protocol_name(protocol_name):
     """Parse protocol name according to our convention with minimal set of fixups
     """
-    lgr.info("reproim parse_dbic_protocol_name: line 761")
+    lgr.info("reproim parse_dbic_protocol_name: line 761... %s", protocol_name)
     # Since Yarik didn't know better place to put it in, but could migrate outside
     # at some point
     protocol_name = protocol_name.replace("anat_T1w", "anat-T1w")
@@ -798,12 +807,12 @@ def parse_dbic_protocol_name(protocol_name):
 
     # Let's analyze first element which should tell us sequence type
     seqtype, seqtype_label = split2(split[0])
-    if seqtype not in {'anat', 'func', 'dwi', 'behav', 'fmap'}:
+    ###if seqtype not in {'anat', 'func', 'dwi', 'behav', 'fmap'}:
         # It is not something we don't consume
-        if bids:
-            lgr.warning("It was instructed to be BIDS sequence but unknown "
-                        "type %s found", seqtype)
-        return {}
+    ###    if bids:
+    ###        lgr.warning("It was instructed to be BIDS sequence but unknown "
+    ###                    "type %s found", seqtype)
+    ###    return {}
 
     regd = dict(seqtype=seqtype)
     if seqtype_label:

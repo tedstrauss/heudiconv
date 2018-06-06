@@ -34,13 +34,14 @@ def group_dicoms_into_seqinfos(files, file_filter, dcmfilter, grouping):
     filegrp : dict
       `filegrp` is a dictionary with files groupped per each sequence
     """
+    lgr.info("FFFFFFFFFFFFFFFFFFFFFFFFFf")
     allowed_groupings = ['studyUID', 'accession_number', None]
     if grouping not in allowed_groupings:
         raise ValueError('I do not know how to group by {0}'.format(grouping))
     per_studyUID = grouping == 'studyUID'
     per_accession_number = grouping == 'accession_number'
     lgr.info("Analyzing %d dicoms", len(files))
-
+    grouping = 'accession_number' # tjs temp
     groups = [[], []]
     mwgroup = []
 
@@ -60,6 +61,8 @@ def group_dicoms_into_seqinfos(files, file_filter, dcmfilter, grouping):
         # TODO after getting a regression test check if the same behavior
         #      with stop_before_pixels=True
         mw = ds.wrapper_from_data(dcm.read_file(filename, force=True))
+        lgr.info("WWWWWWWWWWWWWWWWWWWWWWw")
+        lgr.info("dicoms.py>group_dicoms_into_seqinfos:vars(mw) var: %s", vars(mw))
 
         for sig in ('iop', 'ICE_Dims', 'SequenceName'):
             try:
@@ -70,6 +73,7 @@ def group_dicoms_into_seqinfos(files, file_filter, dcmfilter, grouping):
         try:
             file_studyUID = mw.dcm_data.StudyInstanceUID
         except AttributeError:
+            lgr.info("dicoms.py-group_dicoms_into_seqinfo var: %s", vars(mw))
             lgr.info("File {} is missing any StudyInstanceUID".format(filename))
             file_studyUID = None
 
